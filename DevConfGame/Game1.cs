@@ -9,6 +9,15 @@ using System.Numerics;
 
 namespace DevConfGame;
 
+enum Direction
+{
+    Up, 
+    Down, 
+    Left, 
+    Right
+}
+
+
 public class Game1 : Game
 {
     private GraphicsDeviceManager graphics;
