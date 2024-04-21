@@ -7,7 +7,7 @@ namespace DevConfGame;
 internal class Player
 {
     private Vector2 position = new(50, 50);
-    private int speed = 200;
+    private int speed = 100;
     private Direction direction = Direction.Right;
     private bool isMoving = false;
 

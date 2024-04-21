@@ -5,7 +5,6 @@ using MonoGame.Extended;
 using MonoGame.Extended.ViewportAdapters;
 using System;
 using System.Linq;
-using System.Numerics;
 
 namespace DevConfGame;
 
@@ -25,6 +24,7 @@ public class Game1 : Game
     private Texture2D playerSprite;
     private OrthographicCamera camera;
     Player player = new();
+    Texture2D map;
 
     public Game1()
     {
@@ -53,6 +53,7 @@ public class Game1 : Game
 
         // TODO: use this.Content to load your game content here
         playerSprite = Content.Load<Texture2D>("Player/PlayerIdle");
+        map = Content.Load<Texture2D>("Maps/Map");
     }
 
     protected override void Update(GameTime gameTime)
@@ -73,6 +74,7 @@ public class Game1 : Game
         // TODO: Add your drawing code here
         var transformationMatrix = camera.GetViewMatrix();
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
+        spriteBatch.Draw(map, new Vector2(0, -40), Color.White);
         spriteBatch.Draw(playerSprite, player.Position, Color.White);
         spriteBatch.End();
 
