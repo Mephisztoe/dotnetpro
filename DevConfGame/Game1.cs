@@ -41,7 +41,7 @@ public class Game1 : Game
         spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // TODO: use this.Content to load your game content here
-        playerSprite = GenerateRandomTexture(GraphicsDevice, 16, 16);
+        playerSprite = Content.Load<Texture2D>("Player/PlayerIdle");
     }
 
     protected override void Update(GameTime gameTime)
