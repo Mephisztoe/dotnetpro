@@ -14,6 +14,7 @@ public class Game1 : Game
     private SpriteBatch spriteBatch;
     private Texture2D playerSprite;
     private OrthographicCamera camera;
+    Player _player = new();
 
     public Game1()
     {
@@ -61,7 +62,7 @@ public class Game1 : Game
         // TODO: Add your drawing code here
         var transformationMatrix = camera.GetViewMatrix();
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        spriteBatch.Draw(playerSprite, new Vector2(50, 50), Color.White);
+        spriteBatch.Draw(playerSprite, _player.Position, Color.White);
         spriteBatch.End();
 
         base.Draw(gameTime);
