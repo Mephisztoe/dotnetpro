@@ -6,18 +6,18 @@ namespace DevConfGame;
 
 internal class Player
 {
-    private Vector2 _position = new(50, 50);
-    private int _speed = 200;
+    private Vector2 position = new(50, 50);
+    private int speed = 200;
 
-    public Vector2 Position { get => _position; }
+    public Vector2 Position { get => position; }
 
-    public void SetX(float newX)
+    public void SetX(float newX) => position.X = newX;
+    
+    public void SetY(float newY) => position.Y = newY;
+    
+    public void Update(GameTime gameTime)
     {
-        _position.X = newX;
-    }
-
-    public void SetY(float newY)
-    {
-        _position.Y = newY;
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        position.X += speed * dt;
     }
 }
