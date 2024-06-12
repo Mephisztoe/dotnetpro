@@ -27,6 +27,10 @@ public class Game1 : Game
     Player player = new();   
     TiledMap tiledMap;
     TiledMapRenderer tiledMapRenderer;
+    private Texture2D walkUp;
+    private Texture2D walkDown;
+    private Texture2D walkLeft;
+    private Texture2D walkRight;
 
     public Game1()
     {
@@ -39,6 +43,8 @@ public class Game1 : Game
     {        
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 320, 180);
         camera = new OrthographicCamera(viewportAdapter);
+
+        camera.LookAt(player.Position);
 
         graphics.IsFullScreen = false;
         graphics.PreferredBackBufferWidth = 1600;
@@ -53,9 +59,21 @@ public class Game1 : Game
         spriteBatch = new SpriteBatch(GraphicsDevice);
        
         playerSprite = Content.Load<Texture2D>("Player/PlayerIdle");
+        walkUp = Content.Load<Texture2D>("Player/WalkUp");
+        walkDown = Content.Load<Texture2D>("Player/WalkDown");
+        walkLeft = Content.Load<Texture2D>("Player/WalkLeft");
+        walkRight = Content.Load<Texture2D>("Player/WalkRight");
 
         tiledMap = Content.Load<TiledMap>("Maps/Map");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
+
+        player.animations[0] = new Sprite(walkUp, 4, 8);
+        player.animations[1] = new Sprite(walkDown, 4, 8);
+        player.animations[2] = new Sprite(walkLeft, 4, 8);
+        player.animations[3] = new Sprite(walkRight, 4, 8);
+
+        player.anim = player.animations[0];
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -65,6 +83,8 @@ public class Game1 : Game
                
         player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
+
+        camera.LookAt(player.Position);
 
         base.Update(gameTime);
     }
@@ -77,7 +97,7 @@ public class Game1 : Game
         tiledMapRenderer.Draw(transformationMatrix);
 
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        spriteBatch.Draw(playerSprite, player.Position, Color.White);
+        player.anim.Draw(spriteBatch);
         spriteBatch.End();
 
         base.Draw(gameTime);

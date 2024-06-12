@@ -7,7 +7,7 @@ namespace DevConfGame;
 internal class Player
 {
     private Vector2 position = new(50, 90);
-    private int speed = 100;
+    private int speed = 85;
     private Direction direction = Direction.Right;
     private bool isMoving = false;
 
@@ -16,7 +16,11 @@ internal class Player
     public void SetX(float newX) => position.X = newX;
     
     public void SetY(float newY) => position.Y = newY;
-    
+
+    public Sprite anim;
+    public Sprite[] animations = new Sprite[4];
+
+
     public void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -68,6 +72,20 @@ internal class Player
                 default:
                     break;
             }
+        }
+
+        position.Round();
+
+        anim = animations[(int)direction];
+        anim.position = new Vector2(position.X - 8, position.Y - 8);
+
+        if (isMoving)
+        {
+            anim.Update(gameTime);
+        }
+        else
+        {
+            anim.SetFrame(1);
         }
     }
 }
