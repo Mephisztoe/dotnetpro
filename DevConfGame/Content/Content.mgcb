@@ -10,20 +10,14 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:C:\users\ChristianJacob\.nuget\packages\monogame.extended.content.pipeline\3.9.0-alpha0107\tools\MonoGame.Extended.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Maps/Map.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Maps/Map.png
+#begin Maps/Map.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:Maps/Map.tmx
 
 #begin Player/PlayerIdle.png
 /importer:TextureImporter

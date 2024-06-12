@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using MonoGame.Extended.Tiled;
+using MonoGame.Extended.Tiled.Renderers;
 using MonoGame.Extended.ViewportAdapters;
 using System;
 using System.Linq;
@@ -10,12 +12,11 @@ namespace DevConfGame;
 
 enum Direction
 {
-    Up, 
-    Down, 
-    Left, 
+    Up,
+    Down,
+    Left,
     Right
 }
-
 
 public class Game1 : Game
 {
@@ -23,8 +24,9 @@ public class Game1 : Game
     private SpriteBatch spriteBatch;
     private Texture2D playerSprite;
     private OrthographicCamera camera;
-    Player player = new();
-    Texture2D map;
+    Player player = new();   
+    TiledMap tiledMap;
+    TiledMapRenderer tiledMapRenderer;
 
     public Game1()
     {
@@ -34,8 +36,7 @@ public class Game1 : Game
     }
 
     protected override void Initialize()
-    {
-        // TODO: Add your initialization logic here
+    {        
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 320, 180);
         camera = new OrthographicCamera(viewportAdapter);
 
@@ -50,19 +51,20 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // TODO: use this.Content to load your game content here
+       
         playerSprite = Content.Load<Texture2D>("Player/PlayerIdle");
-        map = Content.Load<Texture2D>("Maps/Map");
+
+        tiledMap = Content.Load<TiledMap>("Maps/Map");
+        tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
     }
 
     protected override void Update(GameTime gameTime)
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-
-        // TODO: Add your update logic here
+               
         player.Update(gameTime);
+        tiledMapRenderer.Update(gameTime);
 
         base.Update(gameTime);
     }
@@ -70,11 +72,11 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        // TODO: Add your drawing code here
+               
         var transformationMatrix = camera.GetViewMatrix();
+        tiledMapRenderer.Draw(transformationMatrix);
+
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        spriteBatch.Draw(map, new Vector2(0, -40), Color.White);
         spriteBatch.Draw(playerSprite, player.Position, Color.White);
         spriteBatch.End();
 
