@@ -10,10 +10,10 @@
     "fileStates": {
         "Maps/Map.tmx": {
             "scale": 3.004375,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 129.4778448096526,
-                "y": 157.1042230081132
+                "x": 142.625338048679,
+                "y": 156.1056792178074
             }
         },
         "TileSheets/Roguelike_Interior.tsx": {

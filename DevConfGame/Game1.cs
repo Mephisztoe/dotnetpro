@@ -84,7 +84,10 @@ public class Game1 : Game
         player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
 
-        camera.LookAt(player.Position);
+        //camera.LookAt(player.Position);
+        Vector2 delta = player.Position - camera.Position - new Vector2(152, 82);
+        camera.Position += (delta * 0.08f);
+
 
         base.Update(gameTime);
     }
@@ -92,9 +95,14 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-               
+
+        Vector2 oldCamPosition = camera.Position;
+        camera.Position = Vector2.Round(camera.Position * 5) / 5.0f;
+
         var transformationMatrix = camera.GetViewMatrix();
         tiledMapRenderer.Draw(transformationMatrix);
+
+        camera.Position = oldCamPosition;
 
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
         player.anim.Draw(spriteBatch);
