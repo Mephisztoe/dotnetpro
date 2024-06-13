@@ -31,6 +31,7 @@ public class Game1 : Game
     private Texture2D walkDown;
     private Texture2D walkLeft;
     private Texture2D walkRight;
+    private Texture2D idleDown;
 
     public Game1()
     {
@@ -63,6 +64,7 @@ public class Game1 : Game
         walkDown = Content.Load<Texture2D>("Player/WalkDown");
         walkLeft = Content.Load<Texture2D>("Player/WalkLeft");
         walkRight = Content.Load<Texture2D>("Player/WalkRight");
+        idleDown = Content.Load<Texture2D>("Player/IdleDown");
 
         tiledMap = Content.Load<TiledMap>("Maps/Map");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
@@ -71,6 +73,7 @@ public class Game1 : Game
         player.animations[1] = new Sprite(walkDown, 4, 8);
         player.animations[2] = new Sprite(walkLeft, 4, 8);
         player.animations[3] = new Sprite(walkRight, 4, 8);
+        player.animations[4] = new Sprite(idleDown, 8, 14);
 
         player.anim = player.animations[0];
 

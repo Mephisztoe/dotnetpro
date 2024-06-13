@@ -18,12 +18,13 @@ internal class Player
     public void SetY(float newY) => position.Y = newY;
 
     public Sprite anim;
-    public Sprite[] animations = new Sprite[4];
+    public Sprite[] animations = new Sprite[5];
 
 
     public void Update(GameTime gameTime)
     {
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float dt = (float)gameTime.ElapsedGameTime
+            .TotalSeconds;
 
         var keyboardState = Keyboard.GetState();
 
@@ -72,20 +73,18 @@ internal class Player
                 default:
                     break;
             }
-        }
 
-        position.Round();
-
-        anim = animations[(int)direction];
-        anim.position = new Vector2(position.X - 8, position.Y - 8);
-
-        if (isMoving)
-        {
-            anim.Update(gameTime);
+            anim = animations[(int)direction];
         }
         else
         {
-            anim.SetFrame(1);
+            anim = animations[4];
         }
+
+        position = Vector2.Round(position * 5) / 5.0f;
+
+        anim.position = new Vector2(position.X, position.Y);
+        anim.Update(gameTime);
     }
+
 }
