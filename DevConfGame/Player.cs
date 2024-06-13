@@ -6,12 +6,14 @@ namespace DevConfGame;
 
 internal class Player
 {
-    private Vector2 position = new(50, 90);
+    private Vector2 position = new(80, 90);
     private int speed = 85;
     private Direction direction = Direction.Right;
     private bool isMoving = false;
 
     public Vector2 Position { get => position; }
+
+    public Direction Direction { get => direction; }
 
     public void SetX(float newX) => position.X = newX;
     
@@ -86,5 +88,4 @@ internal class Player
         anim.position = new Vector2(position.X, position.Y);
         anim.Update(gameTime);
     }
-
 }

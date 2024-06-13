@@ -9,11 +9,11 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "Maps/Map.tmx": {
-            "scale": 3.004375,
-            "selectedLayer": 1,
+            "scale": 2,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 142.625338048679,
-                "y": 156.1056792178074
+                "x": 80.25,
+                "y": 32
             }
         },
         "TileSheets/Roguelike_Interior.tsx": {
@@ -22,7 +22,7 @@
         },
         "TileSheets/Roguelike_RPG.tsx": {
             "scaleInDock": 2,
-            "scaleInEditor": 1.5
+            "scaleInEditor": 4
         }
     },
     "last.imagePath": "C:/Repos/dnp/dotnetpro/DevConfGame/Content/TileSheets",
