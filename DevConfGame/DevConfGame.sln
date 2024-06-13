@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevConfGame", "DevConfGame.csproj", "{C780D31F-D1EB-4B44-B549-B75508E9F89F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevConfGame", "DevConfGame.csproj", "{C780D31F-D1EB-4B44-B549-B75508E9F89F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monogame.ImGuiNet", "..\MonoGame.ImGuiNet\MonoGame.ImGuiNet\Monogame.ImGuiNet.csproj", "{F52E1ADB-3FE8-4D64-B06B-D3F1ADC7B3FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C780D31F-D1EB-4B44-B549-B75508E9F89F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C780D31F-D1EB-4B44-B549-B75508E9F89F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C780D31F-D1EB-4B44-B549-B75508E9F89F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F52E1ADB-3FE8-4D64-B06B-D3F1ADC7B3FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52E1ADB-3FE8-4D64-B06B-D3F1ADC7B3FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52E1ADB-3FE8-4D64-B06B-D3F1ADC7B3FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52E1ADB-3FE8-4D64-B06B-D3F1ADC7B3FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
