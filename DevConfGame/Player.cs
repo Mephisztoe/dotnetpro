@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Sprites;
 
 namespace DevConfGame;
 
-internal class Player
+internal class Player(AnimatedSprite sprite)
 {
     private Vector2 position = new(80, 90);
     private int speed = 85;
@@ -16,12 +17,8 @@ internal class Player
     public Direction Direction { get => direction; }
 
     public void SetX(float newX) => position.X = newX;
-    
+
     public void SetY(float newY) => position.Y = newY;
-
-    public Sprite anim;
-    public Sprite[] animations = new Sprite[5];
-
 
     public void Update(GameTime gameTime)
     {
@@ -62,30 +59,31 @@ internal class Player
             {
                 case Direction.Up:
                     position.Y -= speed * dt;
+                    sprite.Play("walkUp");
                     break;
                 case Direction.Down:
                     position.Y += speed * dt;
+                    sprite.Play("walkDown");
                     break;
                 case Direction.Left:
                     position.X -= speed * dt;
+                    sprite.Play("walkLeft");
                     break;
                 case Direction.Right:
                     position.X += speed * dt;
+                    sprite.Play("walkRight");
                     break;
                 default:
                     break;
             }
-
-            anim = animations[(int)direction];
         }
         else
         {
-            anim = animations[4];
+            sprite.Play("idleDown");
         }
 
         position = Vector2.Round(position * 5) / 5.0f;
 
-        anim.position = new Vector2(position.X, position.Y);
-        anim.Update(gameTime);
+        sprite.Update(gameTime);
     }
 }

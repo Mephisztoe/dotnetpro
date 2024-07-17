@@ -13,6 +13,9 @@ using ImGuiNET;
 using Vec2 = System.Numerics.Vector2;
 using Vec3 = System.Numerics.Vector3;
 using Vec4 = System.Numerics.Vector4;
+using System.Collections.Generic;
+using MonoGame.Extended.Sprites;
+using MonoGame.Extended.TextureAtlases;
 
 namespace DevConfGame;
 
@@ -28,18 +31,16 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
-    private Texture2D playerSprite;
+
+    private AnimatedSprite sprite;
+
     private OrthographicCamera camera;
-    Player player = new();
+    Player player;
     TiledMap tiledMap;
     TiledMapRenderer tiledMapRenderer;
     TiledMapTileLayer floorLayer;
     TiledMapTileLayer decorationLayer;
-    private Texture2D walkUp;
-    private Texture2D walkDown;
-    private Texture2D walkLeft;
-    private Texture2D walkRight;
-    private Texture2D idleDown;
+
     public static ImGuiRenderer guiRenderer;
 
     bool enableCollisionDetection = true;
@@ -57,8 +58,6 @@ public class Game1 : Game
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 320, 180);
         camera = new OrthographicCamera(viewportAdapter);
 
-        camera.LookAt(player.Position);
-
         graphics.IsFullScreen = false;
         graphics.PreferredBackBufferWidth = 1600;
         graphics.PreferredBackBufferHeight = 900;
@@ -73,28 +72,44 @@ public class Game1 : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        playerSprite = Content.Load<Texture2D>("Player/PlayerIdle");
-        walkUp = Content.Load<Texture2D>("Player/WalkUp");
-        walkDown = Content.Load<Texture2D>("Player/WalkDown");
-        walkLeft = Content.Load<Texture2D>("Player/WalkLeft");
-        walkRight = Content.Load<Texture2D>("Player/WalkRight");
-        idleDown = Content.Load<Texture2D>("Player/IdleDown");
-
         tiledMap = Content.Load<TiledMap>("Maps/Map");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
         floorLayer = tiledMap.GetLayer<TiledMapTileLayer>("Floor");
         decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
 
-        player.animations[0] = new Sprite(walkUp, 4, 8);
-        player.animations[1] = new Sprite(walkDown, 4, 8);
-        player.animations[2] = new Sprite(walkLeft, 4, 8);
-        player.animations[3] = new Sprite(walkRight, 4, 8);
-        player.animations[4] = new Sprite(idleDown, 8, 14);
+        var spriteTexture = Content.Load<Texture2D>("Player/SpriteSheet");
+        var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
+        var spriteSheet = new SpriteSheet { TextureAtlas = spriteAtlas };
 
-        player.anim = player.animations[0];
+        AddAnimationCycle(spriteSheet, "walkLeft", [0, 4, 0, 8]);
+        AddAnimationCycle(spriteSheet, "walkRight", [3, 7, 3, 11]);
+        AddAnimationCycle(spriteSheet, "walkUp", [2, 6, 2, 10]);
+        AddAnimationCycle(spriteSheet, "walkDown", [1, 5, 1, 9]);
+        AddAnimationCycle(spriteSheet, "idleDown", [1, 12, 13, 14, 14, 13, 12, 1], frameDuration: .08f);
+
+        sprite = new AnimatedSprite(spriteSheet, "idleDown")
+        {
+            OriginNormalized = new Vector2(0, 0)
+        };
+
+        player = new Player(sprite);
 
         guiRenderer.RebuildFontAtlas();
 
+    }
+
+    private void AddAnimationCycle(SpriteSheet spriteSheet, string name, int[] frames, bool isLooping = true, float frameDuration = .15f)
+    {
+        var cycle = new SpriteSheetAnimationCycle();
+
+        foreach (var f in frames)
+        {
+            cycle.Frames.Add(new SpriteSheetAnimationFrame(f, frameDuration));
+        }
+
+        cycle.IsLooping = isLooping;
+        cycle.FrameDuration = frameDuration;
+        spriteSheet.Cycles.Add(name, cycle);
     }
 
     protected override void Update(GameTime gameTime)
@@ -107,7 +122,7 @@ public class Game1 : Game
 
         player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
-       
+
         bool collision = CollisionCheck(player.Position, player.Direction);
 
         if (enableCollisionDetection && collision)
@@ -139,10 +154,10 @@ public class Game1 : Game
         camera.Position = oldCamPosition;
 
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        player.anim.Draw(spriteBatch);
+        spriteBatch.Draw(sprite, player.Position);
 
         DrawDebugRect(spriteBatch, new RectangleF(player.Position.X, player.Position.Y, 16, 16), 1, Color.Red);
-        
+
         spriteBatch.End();
 
         base.Draw(gameTime);
@@ -228,18 +243,7 @@ public class Game1 : Game
         if (!enableDebugRect)
             return;
 
-        int x = (int)Math.Round(rect.Left);
-        int y = (int)Math.Round(rect.Top);
-        int w = (int)rect.Width;
-        int h = (int)rect.Height;
-
-        var texture = new Texture2D(GraphicsDevice, 1, 1);
-        texture.SetData(new Color[] { color });
-
-        batch.Draw(texture, new Rectangle(x, y, w, border), Color.White); // Top      
-        batch.Draw(texture, new Rectangle(x + w - border, y, border, h), Color.White); // Right   
-        batch.Draw(texture, new Rectangle(x, y + h - border, w, border), Color.White); // Bottom      
-        batch.Draw(texture, new Rectangle(x, y, border, h), Color.White); // Left
+        batch.DrawRectangle(rect, color, .2f);
     }
 
     private List<Point> GetRelevantTiles(Vector2 position, Direction direction)
@@ -284,7 +288,7 @@ public class Game1 : Game
         var tilePositions = GetRelevantTiles(position, direction);
 
         foreach (var tilePos in tilePositions)
-        {            
+        {
             if (CollisionDetected(tilePos, position))
             {
                 return true;
@@ -316,7 +320,7 @@ public class Game1 : Game
                                                tilesetTile.Objects[0].Size.Width, tilesetTile.Objects[0].Size.Height);
 
                 var globalRect = new RectangleF(tilePos.X * tw + localRect.X, tilePos.Y * th + localRect.Y,
-                                                localRect.Width, localRect.Height);                              
+                                                localRect.Width, localRect.Height);
 
                 var playerRect = new RectangleF(playerPos.X, playerPos.Y, 16, 16);
 
