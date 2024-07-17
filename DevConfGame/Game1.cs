@@ -47,6 +47,9 @@ public class Game1 : Game
 
     bool enableCollisionDetection = true;
     bool enableDebugRect = true;
+    bool enableForegroundLayer = true;
+    bool enableDecorationLayer = true;
+    bool enableFloorLayer = true;
     List<Tuple<RectangleF, Color>> debugRects = [];
 
     public Game1()
@@ -155,27 +158,31 @@ public class Game1 : Game
         camera.Position = Vector2.Round(camera.Position * 5) / 5.0f;
 
         var transformationMatrix = camera.GetViewMatrix();
-        
-        tiledMapRenderer.Draw(floorLayer, viewMatrix: transformationMatrix);
-        tiledMapRenderer.Draw(decorationLayer, viewMatrix: transformationMatrix);
+
+        if (enableFloorLayer)
+            tiledMapRenderer.Draw(floorLayer, viewMatrix: transformationMatrix);
+
+        if (enableDecorationLayer)
+            tiledMapRenderer.Draw(decorationLayer, viewMatrix: transformationMatrix);
 
         camera.Position = oldCamPosition;
 
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
         spriteBatch.Draw(sprite, player.Position);
 
-        debugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X+2, player.Position.Y+12, 12, 4), Color.Red));
+        debugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
 
         foreach (var debugRect in debugRects)
         {
             DrawDebugRect(spriteBatch, debugRect.Item1, 1, debugRect.Item2);
-        }       
+        }
 
         spriteBatch.End();
 
         base.Draw(gameTime);
 
-        tiledMapRenderer.Draw(foregroundLayer, viewMatrix: transformationMatrix);
+        if (enableForegroundLayer)
+            tiledMapRenderer.Draw(foregroundLayer, viewMatrix: transformationMatrix);
 
         guiRenderer.BeginLayout(gameTime);
         DrawImGuiOverlay(frameRate);
@@ -183,6 +190,12 @@ public class Game1 : Game
         ImGui.Checkbox("Debug Rect", ref enableDebugRect);
         ImGui.Checkbox("Collision Detection", ref enableCollisionDetection);
         ImGui.End();
+        ImGui.Begin("Tilemap");
+        ImGui.Checkbox("Show Floor Layer", ref enableFloorLayer);
+        ImGui.Checkbox("Show Decoration Layer", ref enableDecorationLayer);
+        ImGui.Checkbox("Show Foreground Layer", ref enableForegroundLayer);
+        ImGui.End();
+
         guiRenderer.EndLayout();
     }
 
@@ -337,7 +350,7 @@ public class Game1 : Game
                 var globalRect = new RectangleF(tilePos.X * tw + localRect.X, tilePos.Y * th + localRect.Y,
                                                 localRect.Width, localRect.Height);
 
-                var playerRect = new RectangleF(playerPos.X+2, playerPos.Y+12, 12, 4);
+                var playerRect = new RectangleF(playerPos.X + 2, playerPos.Y + 12, 12, 4);
 
                 var collision = globalRect.Intersects(playerRect);
 
