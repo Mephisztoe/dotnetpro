@@ -157,6 +157,10 @@ public class Game1 : Game
         Vector2 oldCamPosition = camera.Position;
         camera.Position = Vector2.Round(camera.Position * 5) / 5.0f;
 
+        camera.Position = new Vector2(
+            MathHelper.Clamp(camera.Position.X, -20, 20),
+            MathHelper.Clamp(camera.Position.Y, -20, 160));
+
         var transformationMatrix = camera.GetViewMatrix();
 
         if (enableFloorLayer)
