@@ -45,6 +45,7 @@ public class Game1 : Game
 
     bool enableCollisionDetection = true;
     bool enableDebugRect = true;
+    List<Tuple<RectangleF, Color>> debugRects = [];
 
     public Game1()
     {
@@ -117,6 +118,8 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        debugRects.Clear();
+
         // Backup Position
         var playerPos = player.Position;
 
@@ -156,7 +159,12 @@ public class Game1 : Game
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
         spriteBatch.Draw(sprite, player.Position);
 
-        DrawDebugRect(spriteBatch, new RectangleF(player.Position.X, player.Position.Y, 16, 16), 1, Color.Red);
+        debugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X+2, player.Position.Y+12, 12, 4), Color.Red));
+
+        foreach (var debugRect in debugRects)
+        {
+            DrawDebugRect(spriteBatch, debugRect.Item1, 1, debugRect.Item2);
+        }       
 
         spriteBatch.End();
 
@@ -322,9 +330,18 @@ public class Game1 : Game
                 var globalRect = new RectangleF(tilePos.X * tw + localRect.X, tilePos.Y * th + localRect.Y,
                                                 localRect.Width, localRect.Height);
 
-                var playerRect = new RectangleF(playerPos.X, playerPos.Y, 16, 16);
+                var playerRect = new RectangleF(playerPos.X+2, playerPos.Y+12, 12, 4);
 
                 var collision = globalRect.Intersects(playerRect);
+
+                if (collision)
+                {
+                    debugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Red));
+                }
+                else
+                {
+                    debugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Green));
+                }
 
                 return collision;
             }
