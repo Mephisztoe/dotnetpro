@@ -3,43 +3,52 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Maps/Map.tmx",
+    "activeFile": "Maps/MainRoom.tmx",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "Maps/MainRoom.tmx": {
+            "scale": 2.41359375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 160.34181394445523,
+                "y": 160.13465397811873
+            }
+        },
         "Maps/Map.tmx": {
             "scale": 2,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 80.25,
-                "y": 32
+                "x": 163.5,
+                "y": 157.75
             }
         },
         "TileSheets/Roguelike_Interior.tsx": {
-            "scaleInDock": 3,
+            "scaleInDock": 1,
             "scaleInEditor": 4
         },
         "TileSheets/Roguelike_RPG.tsx": {
-            "scaleInDock": 2,
-            "scaleInEditor": 4
+            "scaleInDock": 3,
+            "scaleInEditor": 2
         }
     },
     "last.imagePath": "C:/Repos/dnp/dotnetpro/DevConfGame/Content/TileSheets",
+    "map.height": 10,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
-    "map.width": 20,
+    "map.width": 10,
     "openFiles": [
         "TileSheets/Roguelike_Interior.tsx",
         "TileSheets/Roguelike_RPG.tsx",
-        "Maps/Map.tmx"
+        "Maps/MainRoom.tmx"
     ],
     "project": "DevConfGame.tiled-project",
     "recentFiles": [
         "TileSheets/Roguelike_Interior.tsx",
         "TileSheets/Roguelike_RPG.tsx",
-        "Maps/Map.tmx"
+        "Maps/MainRoom.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.spacing": 1,

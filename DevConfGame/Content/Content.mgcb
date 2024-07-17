@@ -14,10 +14,15 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Maps/Map.tmx
+#begin Maps/LockerRoom.tmx
 /importer:TiledMapImporter
 /processor:TiledMapProcessor
-/build:Maps/Map.tmx
+/build:Maps/LockerRoom.tmx
+
+#begin Maps/MainRoom.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:Maps/MainRoom.tmx
 
 #begin Player/SpriteSheet.png
 /importer:TextureImporter

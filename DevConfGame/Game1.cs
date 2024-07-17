@@ -78,7 +78,7 @@ public class Game1 : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        tiledMap = Content.Load<TiledMap>("Maps/Map");
+        tiledMap = Content.Load<TiledMap>("Maps/MainRoom");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
         floorLayer = tiledMap.GetLayer<TiledMapTileLayer>("Floor");
         decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
