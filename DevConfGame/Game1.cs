@@ -40,6 +40,8 @@ public class Game1 : Game
     TiledMapRenderer tiledMapRenderer;
     TiledMapTileLayer floorLayer;
     TiledMapTileLayer decorationLayer;
+    TiledMapTileLayer foregroundLayer;
+
 
     public static ImGuiRenderer guiRenderer;
 
@@ -77,6 +79,7 @@ public class Game1 : Game
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
         floorLayer = tiledMap.GetLayer<TiledMapTileLayer>("Floor");
         decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
+        foregroundLayer = tiledMap.GetLayer<TiledMapTileLayer>("Foreground");
 
         var spriteTexture = Content.Load<Texture2D>("Player/SpriteSheet");
         var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
@@ -152,7 +155,9 @@ public class Game1 : Game
         camera.Position = Vector2.Round(camera.Position * 5) / 5.0f;
 
         var transformationMatrix = camera.GetViewMatrix();
-        tiledMapRenderer.Draw(transformationMatrix);
+        
+        tiledMapRenderer.Draw(floorLayer, viewMatrix: transformationMatrix);
+        tiledMapRenderer.Draw(decorationLayer, viewMatrix: transformationMatrix);
 
         camera.Position = oldCamPosition;
 
@@ -169,6 +174,8 @@ public class Game1 : Game
         spriteBatch.End();
 
         base.Draw(gameTime);
+
+        tiledMapRenderer.Draw(foregroundLayer, viewMatrix: transformationMatrix);
 
         guiRenderer.BeginLayout(gameTime);
         DrawImGuiOverlay(frameRate);
