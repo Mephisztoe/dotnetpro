@@ -26,33 +26,38 @@ public enum Direction
     Left,
     Right
 }
+public enum ScreenName
+{
+    MainRoom,
+    Locker
+}
 
 public class Game1 : Game
 {
     private GraphicsDeviceManager graphics;
-    private SpriteBatch spriteBatch;
 
-    private AnimatedSprite sprite;
+    public SpriteBatch SpriteBatch { get; private set; }
 
-    private OrthographicCamera camera;
-    Player player;
+    public OrthographicCamera Camera { get; private set; }
+
+    public Player Player { get; private set; }
+
+    public ImGuiRenderer GuiRenderer { get; private set; }
+
+    public CollisionDetector CollisionDetector { get; private set; }
+
     TiledMap tiledMap;
     TiledMapRenderer tiledMapRenderer;
     TiledMapTileLayer floorLayer;
     TiledMapTileLayer decorationLayer;
     TiledMapTileLayer foregroundLayer;
 
-
-    public static ImGuiRenderer guiRenderer;
-
     bool enableCollisionDetection = true;
     bool enableDebugRect = true;
     bool enableForegroundLayer = true;
     bool enableDecorationLayer = true;
     bool enableFloorLayer = true;
-
-    private CollisionDetector collisionDetector;
-
+    
     static public List<Tuple<RectangleF, Color>> DebugRects = [];
 
     public Game1()
@@ -65,21 +70,21 @@ public class Game1 : Game
     protected override void Initialize()
     {
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 320, 180);
-        camera = new OrthographicCamera(viewportAdapter);
+        Camera = new OrthographicCamera(viewportAdapter);
 
         graphics.IsFullScreen = false;
         graphics.PreferredBackBufferWidth = 1600;
         graphics.PreferredBackBufferHeight = 900;
         graphics.ApplyChanges();
 
-        guiRenderer = new ImGuiRenderer(this);
+        GuiRenderer = new ImGuiRenderer(this);
 
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        spriteBatch = new SpriteBatch(GraphicsDevice);
+        SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         tiledMap = Content.Load<TiledMap>("Maps/MainRoom");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
@@ -87,7 +92,7 @@ public class Game1 : Game
         decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
         foregroundLayer = tiledMap.GetLayer<TiledMapTileLayer>("Foreground");
 
-        collisionDetector = new CollisionDetector(tiledMap);
+        CollisionDetector = new CollisionDetector(tiledMap);
 
         var spriteTexture = Content.Load<Texture2D>("Player/SpriteSheet");
         var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
@@ -99,15 +104,14 @@ public class Game1 : Game
         AddAnimationCycle(spriteSheet, "walkDown", [1, 5, 1, 9]);
         AddAnimationCycle(spriteSheet, "idleDown", [1, 12, 13, 14, 14, 13, 12, 1], frameDuration: .08f);
 
-        sprite = new AnimatedSprite(spriteSheet, "idleDown")
+        var sprite = new AnimatedSprite(spriteSheet, "idleDown")
         {
             OriginNormalized = new Vector2(0, 0)
         };
 
-        player = new Player(sprite);
+        Player = new Player(sprite);
 
-        guiRenderer.RebuildFontAtlas();
-
+        GuiRenderer.RebuildFontAtlas();
     }
 
     private void AddAnimationCycle(SpriteSheet spriteSheet, string name, int[] frames, bool isLooping = true, float frameDuration = .15f)
@@ -132,23 +136,22 @@ public class Game1 : Game
         DebugRects.Clear();
 
         // Backup Position
-        var playerPos = player.Position;
+        var playerPos = Player.Position;
 
-        player.Update(gameTime);
+        Player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
 
-        bool collision = collisionDetector.CollisionCheck(floorLayer, player.Position, player.Direction);
+        bool collision = CollisionDetector.CollisionCheck(floorLayer, Player.Position, Player.Direction);
 
         if (enableCollisionDetection && collision)
         {
             // Revert Position
-            player.SetX(playerPos.X);
-            player.SetY(playerPos.Y);
+            Player.SetX(playerPos.X);
+            Player.SetY(playerPos.Y);
         }
-
-        //camera.LookAt(player.Position);
-        Vector2 delta = player.Position - camera.Position - new Vector2(152, 82);
-        camera.Position += (delta * 0.08f);
+       
+        Vector2 delta = Player.Position - Camera.Position - new Vector2(152, 82);
+        Camera.Position += (delta * 0.08f);
 
         base.Update(gameTime);
     }
@@ -159,14 +162,14 @@ public class Game1 : Game
 
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        Vector2 oldCamPosition = camera.Position;
-        camera.Position = Vector2.Round(camera.Position * 5) / 5.0f;
+        Vector2 oldCamPosition = Camera.Position;
+        Camera.Position = Vector2.Round(Camera.Position * 5) / 5.0f;
 
-        camera.Position = new Vector2(
-            MathHelper.Clamp(camera.Position.X, -20, 20),
-            MathHelper.Clamp(camera.Position.Y, -20, 160));
+        Camera.Position = new Vector2(
+            MathHelper.Clamp(Camera.Position.X, -20, 20),
+            MathHelper.Clamp(Camera.Position.Y, -20, 160));
 
-        var transformationMatrix = camera.GetViewMatrix();
+        var transformationMatrix = Camera.GetViewMatrix();
 
         if (enableFloorLayer)
             tiledMapRenderer.Draw(floorLayer, viewMatrix: transformationMatrix);
@@ -174,26 +177,26 @@ public class Game1 : Game
         if (enableDecorationLayer)
             tiledMapRenderer.Draw(decorationLayer, viewMatrix: transformationMatrix);
 
-        camera.Position = oldCamPosition;
+        Camera.Position = oldCamPosition;
 
-        spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        spriteBatch.Draw(sprite, player.Position);
+        SpriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
+        SpriteBatch.Draw(Player.Sprite, Player.Position);
 
-        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
+        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(Player.Position.X + 2, Player.Position.Y + 12, 12, 4), Color.Red));
 
         foreach (var debugRect in DebugRects)
         {
-            DrawDebugRect(spriteBatch, debugRect.Item1, 1, debugRect.Item2);
+            DrawDebugRect(SpriteBatch, debugRect.Item1, 1, debugRect.Item2);
         }
 
-        spriteBatch.End();
+        SpriteBatch.End();
 
         base.Draw(gameTime);
 
         if (enableForegroundLayer)
             tiledMapRenderer.Draw(foregroundLayer, viewMatrix: transformationMatrix);
 
-        guiRenderer.BeginLayout(gameTime);
+        GuiRenderer.BeginLayout(gameTime);
         DrawImGuiOverlay(frameRate);
         ImGui.Begin("Collision Details");
         ImGui.Checkbox("Debug Rect", ref enableDebugRect);
@@ -205,7 +208,7 @@ public class Game1 : Game
         ImGui.Checkbox("Show Foreground Layer", ref enableForegroundLayer);
         ImGui.End();
 
-        guiRenderer.EndLayout();
+        GuiRenderer.EndLayout();
     }
 
     //OverlayVariables
@@ -281,11 +284,5 @@ public class Game1 : Game
             return;
 
         batch.DrawRectangle(rect, color, .2f);
-    }
-
-   
-
-    
-
-    
+    }    
 }

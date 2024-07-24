@@ -5,12 +5,14 @@ using MonoGame.Extended.Sprites;
 
 namespace DevConfGame;
 
-internal class Player(AnimatedSprite sprite)
+public class Player(AnimatedSprite sprite)
 {
     private Vector2 position = new(80, 90);
     private int speed = 85;
     private Direction direction = Direction.Right;
     private bool isMoving = false;
+
+    public Sprite Sprite { get => sprite; }
 
     public Vector2 Position { get => position; }
 
