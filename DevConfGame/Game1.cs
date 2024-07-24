@@ -19,7 +19,7 @@ using MonoGame.Extended.TextureAtlases;
 
 namespace DevConfGame;
 
-enum Direction
+public enum Direction
 {
     Up,
     Down,
@@ -50,7 +50,10 @@ public class Game1 : Game
     bool enableForegroundLayer = true;
     bool enableDecorationLayer = true;
     bool enableFloorLayer = true;
-    List<Tuple<RectangleF, Color>> debugRects = [];
+
+    private CollisionDetector collisionDetector;
+
+    static public List<Tuple<RectangleF, Color>> DebugRects = [];
 
     public Game1()
     {
@@ -83,6 +86,8 @@ public class Game1 : Game
         floorLayer = tiledMap.GetLayer<TiledMapTileLayer>("Floor");
         decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
         foregroundLayer = tiledMap.GetLayer<TiledMapTileLayer>("Foreground");
+
+        collisionDetector = new CollisionDetector(tiledMap);
 
         var spriteTexture = Content.Load<Texture2D>("Player/SpriteSheet");
         var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
@@ -124,7 +129,7 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        debugRects.Clear();
+        DebugRects.Clear();
 
         // Backup Position
         var playerPos = player.Position;
@@ -132,7 +137,7 @@ public class Game1 : Game
         player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
 
-        bool collision = CollisionCheck(player.Position, player.Direction);
+        bool collision = collisionDetector.CollisionCheck(floorLayer, player.Position, player.Direction);
 
         if (enableCollisionDetection && collision)
         {
@@ -174,9 +179,9 @@ public class Game1 : Game
         spriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
         spriteBatch.Draw(sprite, player.Position);
 
-        debugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
+        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
 
-        foreach (var debugRect in debugRects)
+        foreach (var debugRect in DebugRects)
         {
             DrawDebugRect(spriteBatch, debugRect.Item1, 1, debugRect.Item2);
         }
@@ -278,99 +283,9 @@ public class Game1 : Game
         batch.DrawRectangle(rect, color, .2f);
     }
 
-    private List<Point> GetRelevantTiles(Vector2 position, Direction direction)
-    {
-        var tw = tiledMap.TileWidth;
-        var th = tiledMap.TileHeight;
+   
 
-        var baseTileX = (ushort)((position.X + 8) / tw);
-        var baseTileY = (ushort)((position.Y + 8) / th);
+    
 
-        var tiles = new List<Point> { new(baseTileX, baseTileY) };
-
-        switch (direction)
-        {
-            case Direction.Left:
-                tiles.Add(new Point(baseTileX - 1, baseTileY));
-                tiles.Add(new Point(baseTileX - 1, baseTileY - 1));
-                tiles.Add(new Point(baseTileX - 1, baseTileY + 1));
-                break;
-            case Direction.Right:
-                tiles.Add(new Point(baseTileX + 1, baseTileY));
-                tiles.Add(new Point(baseTileX + 1, baseTileY - 1));
-                tiles.Add(new Point(baseTileX + 1, baseTileY + 1));
-                break;
-            case Direction.Up:
-                tiles.Add(new Point(baseTileX, baseTileY - 1));
-                tiles.Add(new Point(baseTileX - 1, baseTileY - 1));
-                tiles.Add(new Point(baseTileX + 1, baseTileY - 1));
-                break;
-            case Direction.Down:
-                tiles.Add(new Point(baseTileX, baseTileY + 1));
-                tiles.Add(new Point(baseTileX - 1, baseTileY + 1));
-                tiles.Add(new Point(baseTileX + 1, baseTileY + 1));
-                break;
-        }
-
-        return tiles;
-    }
-
-    private bool CollisionCheck(Vector2 position, Direction direction)
-    {
-        var tilePositions = GetRelevantTiles(position, direction);
-
-        foreach (var tilePos in tilePositions)
-        {
-            if (CollisionDetected(tilePos, position))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private bool CollisionDetected(Point tilePos, Vector2 playerPos)
-    {
-        var tw = tiledMap.TileWidth;
-        var th = tiledMap.TileHeight;
-
-        TiledMapTile? collisionTile = null;
-
-        bool found = floorLayer.TryGetTile((ushort)tilePos.X, (ushort)tilePos.Y, out collisionTile);
-
-        if (found && !collisionTile.Value.IsBlank)
-        {
-            var tileset = tiledMap.GetTilesetByTileGlobalIdentifier(collisionTile.Value.GlobalIdentifier);
-            var firstGlobalIdentifier = tiledMap.GetTilesetFirstGlobalIdentifier(tileset);
-            var localTileIdentifier = collisionTile.Value.GlobalIdentifier - firstGlobalIdentifier;
-
-            var tilesetTile = tileset.Tiles.FirstOrDefault(x => x.LocalTileIdentifier == localTileIdentifier);
-            if (tilesetTile != null && tilesetTile.Objects.Count != 0)
-            {
-                var localRect = new RectangleF(tilesetTile.Objects[0].Position.X, tilesetTile.Objects[0].Position.Y,
-                                               tilesetTile.Objects[0].Size.Width, tilesetTile.Objects[0].Size.Height);
-
-                var globalRect = new RectangleF(tilePos.X * tw + localRect.X, tilePos.Y * th + localRect.Y,
-                                                localRect.Width, localRect.Height);
-
-                var playerRect = new RectangleF(playerPos.X + 2, playerPos.Y + 12, 12, 4);
-
-                var collision = globalRect.Intersects(playerRect);
-
-                if (collision)
-                {
-                    debugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Red));
-                }
-                else
-                {
-                    debugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Green));
-                }
-
-                return collision;
-            }
-        }
-
-        return false;
-    }
+    
 }
