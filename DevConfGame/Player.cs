@@ -2,8 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
-using MonoGame.Extended.Sprites;
-using MonoGame.Extended.TextureAtlases;
+using MonoGame.Extended.Graphics;
 using System;
 
 namespace DevConfGame;
@@ -14,8 +13,8 @@ public class Player(Game game) :
     public override void LoadContent()
     {
         var spriteTexture = Game.Content.Load<Texture2D>("Player/SpriteSheet");
-        var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
-        var spriteSheet = new SpriteSheet { TextureAtlas = spriteAtlas };
+        var spriteAtlas = Texture2DAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
+        var spriteSheet = new SpriteSheet("spriteSheet", spriteAtlas);
 
         AddAnimationCycle(spriteSheet, "walkLeft", [0, 4, 0, 8]);
         AddAnimationCycle(spriteSheet, "walkRight", [3, 7, 3, 11]);
@@ -62,29 +61,35 @@ public class Player(Game game) :
 
         if (isMoving)
         {
-            switch (direction)
+            var movement = direction switch
             {
-                case Direction.Up:
-                    position.Y -= speed * dt;
-                    sprite.Play("walkUp");
-                    break;
-                case Direction.Down:
-                    position.Y += speed * dt;
-                    sprite.Play("walkDown");
-                    break;
-                case Direction.Left:
-                    position.X -= speed * dt;
-                    sprite.Play("walkLeft");
-                    break;
-                case Direction.Right:
-                    position.X += speed * dt;
-                    sprite.Play("walkRight");
-                    break;
+                Direction.Up => new Vector2(0, -speed * dt),
+                Direction.Down => new Vector2(0, speed * dt),
+                Direction.Left => new Vector2(-speed * dt, 0),
+                Direction.Right => new Vector2(speed * dt, 0),
+                _ => Vector2.Zero
+            };
+
+            position += movement;
+
+            var animation = direction switch
+            {
+                Direction.Up => "walkUp",
+                Direction.Down => "walkDown",
+                Direction.Left => "walkLeft",
+                Direction.Right => "walkRight",
+                _ => sprite.CurrentAnimation // falls direction nicht passt, bleibt die aktuelle Animation
+            };
+
+            if (!sprite.CurrentAnimation.Equals(animation))
+            {
+                sprite.SetAnimation(animation);
             }
         }
         else
         {
-            sprite.Play("idleDown");
+            if (!sprite.CurrentAnimation.Equals("idleDown"))
+                sprite.SetAnimation("idleDown");
         }
 
         position = Vector2.Round(position * 5) / 5.0f;

@@ -14,8 +14,6 @@ using Vec2 = System.Numerics.Vector2;
 using Vec3 = System.Numerics.Vector3;
 using Vec4 = System.Numerics.Vector4;
 using System.Collections.Generic;
-using MonoGame.Extended.Sprites;
-using MonoGame.Extended.TextureAtlases;
 
 namespace DevConfGame;
 

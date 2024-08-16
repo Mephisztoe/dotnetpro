@@ -1,11 +1,11 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using MonoGame.Extended.Sprites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MonoGame.Extended.Graphics;
 
 namespace DevConfGame;
 
@@ -39,17 +39,14 @@ public abstract class GameCharacter(Game game, Vector2 startPosition, int moveme
 
     protected void AddAnimationCycle(SpriteSheet spriteSheet, string name, int[] frames, bool isLooping = true, float frameDuration = .15f)
     {
-        var cycle = new SpriteSheetAnimationCycle
+        spriteSheet.DefineAnimation(name, builder =>
         {
-            IsLooping = isLooping,
-            FrameDuration = frameDuration
-        };
+            builder.IsLooping(isLooping);
 
-        foreach (var frame in frames)
-        {
-            cycle.Frames.Add(new SpriteSheetAnimationFrame(frame, frameDuration));
-        }
-
-        spriteSheet.Cycles.Add(name, cycle);
+            for (int i = 0; i < frames.Length; i++)
+            {
+                builder.AddFrame(frames[i], TimeSpan.FromSeconds(frameDuration));
+            }
+        });
     }
 }
