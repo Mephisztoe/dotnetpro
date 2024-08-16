@@ -1,32 +1,37 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
 using MonoGame.Extended.Sprites;
+using MonoGame.Extended.TextureAtlases;
+using System;
 
 namespace DevConfGame;
 
-public class Player(AnimatedSprite sprite)
+public class Player(Game game) :
+    GameCharacter(game, new Vector2(80, 90), 85)
 {
-    private Vector2 position = new(80, 90);
-    private int speed = 85;
-    private Direction direction = Direction.Right;
-    private bool isMoving = false;
-
-    public Sprite Sprite { get => sprite; }
-
-    public Vector2 Position { get => position; }
-
-    public Direction Direction { get => direction; }
-
-    public void SetX(float newX) => position.X = newX;
-
-    public void SetY(float newY) => position.Y = newY;
-
-    public void Update(GameTime gameTime)
+    public override void LoadContent()
     {
-        float dt = (float)gameTime.ElapsedGameTime
-            .TotalSeconds;
+        var spriteTexture = Game.Content.Load<Texture2D>("Player/SpriteSheet");
+        var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
+        var spriteSheet = new SpriteSheet { TextureAtlas = spriteAtlas };
 
+        AddAnimationCycle(spriteSheet, "walkLeft", [0, 4, 0, 8]);
+        AddAnimationCycle(spriteSheet, "walkRight", [3, 7, 3, 11]);
+        AddAnimationCycle(spriteSheet, "walkUp", [2, 6, 2, 10]);
+        AddAnimationCycle(spriteSheet, "walkDown", [1, 5, 1, 9]);
+        AddAnimationCycle(spriteSheet, "idleDown", [1, 12, 13, 14, 14, 13, 12, 1], frameDuration: .08f);
+
+        sprite = new AnimatedSprite(spriteSheet, "idleDown")
+        {
+            OriginNormalized = new Vector2(0, 0)
+        };
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         var keyboardState = Keyboard.GetState();
 
         isMoving = false;
@@ -75,8 +80,6 @@ public class Player(AnimatedSprite sprite)
                     position.X += speed * dt;
                     sprite.Play("walkRight");
                     break;
-                default:
-                    break;
             }
         }
         else
@@ -85,6 +88,9 @@ public class Player(AnimatedSprite sprite)
         }
 
         position = Vector2.Round(position * 5) / 5.0f;
+
+        Game1.DebugRects.Add(new Tuple<RectangleF, Color>(
+            new RectangleF(position.X + 2, position.Y + 12, 12, 4), Color.Red));
 
         sprite.Update(gameTime);
     }

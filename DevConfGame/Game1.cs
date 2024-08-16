@@ -40,7 +40,7 @@ public class Game1 : Game
 
     public OrthographicCamera Camera { get; private set; }
 
-    public Player Player { get; private set; }
+    Player player;
 
     public ImGuiRenderer GuiRenderer { get; private set; }
 
@@ -65,6 +65,8 @@ public class Game1 : Game
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        player = new Player(this);
     }
 
     protected override void Initialize()
@@ -94,39 +96,11 @@ public class Game1 : Game
 
         CollisionDetector = new CollisionDetector(tiledMap);
 
-        var spriteTexture = Content.Load<Texture2D>("Player/SpriteSheet");
-        var spriteAtlas = TextureAtlas.Create("spriteAtlas", spriteTexture, 16, 16);
-        var spriteSheet = new SpriteSheet { TextureAtlas = spriteAtlas };
+        player.LoadContent();
 
-        AddAnimationCycle(spriteSheet, "walkLeft", [0, 4, 0, 8]);
-        AddAnimationCycle(spriteSheet, "walkRight", [3, 7, 3, 11]);
-        AddAnimationCycle(spriteSheet, "walkUp", [2, 6, 2, 10]);
-        AddAnimationCycle(spriteSheet, "walkDown", [1, 5, 1, 9]);
-        AddAnimationCycle(spriteSheet, "idleDown", [1, 12, 13, 14, 14, 13, 12, 1], frameDuration: .08f);
-
-        var sprite = new AnimatedSprite(spriteSheet, "idleDown")
-        {
-            OriginNormalized = new Vector2(0, 0)
-        };
-
-        Player = new Player(sprite);
 
         GuiRenderer.RebuildFontAtlas();
-    }
-
-    private void AddAnimationCycle(SpriteSheet spriteSheet, string name, int[] frames, bool isLooping = true, float frameDuration = .15f)
-    {
-        var cycle = new SpriteSheetAnimationCycle();
-
-        foreach (var f in frames)
-        {
-            cycle.Frames.Add(new SpriteSheetAnimationFrame(f, frameDuration));
-        }
-
-        cycle.IsLooping = isLooping;
-        cycle.FrameDuration = frameDuration;
-        spriteSheet.Cycles.Add(name, cycle);
-    }
+    }   
 
     protected override void Update(GameTime gameTime)
     {
@@ -136,21 +110,21 @@ public class Game1 : Game
         DebugRects.Clear();
 
         // Backup Position
-        var playerPos = Player.Position;
+        var playerPos = player.Position;
 
-        Player.Update(gameTime);
+        player.Update(gameTime);
         tiledMapRenderer.Update(gameTime);
 
-        bool collision = CollisionDetector.CollisionCheck(floorLayer, Player.Position, Player.Direction);
+        bool collision = CollisionDetector.CollisionCheck(floorLayer, player.Position, player.Direction);
 
         if (enableCollisionDetection && collision)
         {
             // Revert Position
-            Player.SetX(playerPos.X);
-            Player.SetY(playerPos.Y);
+            player.SetX(playerPos.X);
+            player.SetY(playerPos.Y);
         }
        
-        Vector2 delta = Player.Position - Camera.Position - new Vector2(152, 82);
+        Vector2 delta = player.Position - Camera.Position - new Vector2(152, 82);
         Camera.Position += (delta * 0.08f);
 
         base.Update(gameTime);
@@ -180,9 +154,9 @@ public class Game1 : Game
         Camera.Position = oldCamPosition;
 
         SpriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        SpriteBatch.Draw(Player.Sprite, Player.Position);
-
-        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(Player.Position.X + 2, Player.Position.Y + 12, 12, 4), Color.Red));
+        player.Draw(gameTime, SpriteBatch);
+      
+        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
 
         foreach (var debugRect in DebugRects)
         {
