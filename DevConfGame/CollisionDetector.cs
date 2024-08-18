@@ -9,19 +9,23 @@ namespace DevConfGame;
 
 public class CollisionDetector(TiledMap tiledMap)
 {
-    public bool CollisionCheck(TiledMapTileLayer layer, Vector2 position, Direction direction)
+    public TiledMapTilesetTile CollisionCheck(TiledMapTileLayer layer, Vector2 position, Direction direction, string tileName = "")
     {
         var tilePositions = GetRelevantTiles(position, direction);
 
+        TiledMapTilesetTile collisionTile;
+
         foreach (var tilePos in tilePositions)
         {
-            if (CollisionDetected(layer, tilePos, position))
+            collisionTile = CollisionDetected(layer, tilePos, position, tileName);
+
+            if (collisionTile != null)
             {
-                return true;
+                return collisionTile;
             }
         }
 
-        return false;
+        return null;
     }
 
     private List<Point> GetRelevantTiles(Vector2 position, Direction direction)
@@ -61,7 +65,7 @@ public class CollisionDetector(TiledMap tiledMap)
         return tiles;
     }
 
-    private bool CollisionDetected(TiledMapTileLayer layer, Point tilePos, Vector2 playerPos)
+    private TiledMapTilesetTile CollisionDetected(TiledMapTileLayer layer, Point tilePos, Vector2 playerPos, string tileName = "")
     {
         var tw = tiledMap.TileWidth;
         var th = tiledMap.TileHeight;
@@ -77,7 +81,7 @@ public class CollisionDetector(TiledMap tiledMap)
             var localTileIdentifier = collisionTile.Value.GlobalIdentifier - firstGlobalIdentifier;
 
             var tilesetTile = tileset.Tiles.FirstOrDefault(x => x.LocalTileIdentifier == localTileIdentifier);
-            if (tilesetTile != null && tilesetTile.Objects.Count != 0)
+            if (tilesetTile?.Objects?.Count > 0 && (string.IsNullOrEmpty(tileName) || tilesetTile.Objects[0].Name == tileName))
             {
                 var localRect = new RectangleF(tilesetTile.Objects[0].Position.X, tilesetTile.Objects[0].Position.Y,
                                                tilesetTile.Objects[0].Size.Width, tilesetTile.Objects[0].Size.Height);
@@ -92,16 +96,16 @@ public class CollisionDetector(TiledMap tiledMap)
                 if (collision)
                 {
                     GameMain.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Red));
+                    return tilesetTile;
                 }
                 else
                 {
                     GameMain.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Green));
+                    return null;
                 }
-
-                return collision;
             }
         }
 
-        return false;
+        return null;
     }
 }

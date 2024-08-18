@@ -25,7 +25,7 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
     new GameMain Game => (GameMain)base.Game;
 
     public override void LoadContent()
-    {      
+    {
         tiledMap = Content.Load<TiledMap>("Maps/MainScreen");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
 
@@ -45,7 +45,6 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
         Game.ImGuiRenderRequested -= RegisterImGuiHandlers;
     }
 
-
     public override void Update(GameTime gameTime)
     {
         // Backup Position
@@ -55,24 +54,23 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
         tiledMapRenderer.Update(gameTime);
 
         var collisionTile = collisionDetector.CollisionCheck(floorLayer, Game.Player.Position, Game.Player.Direction);
-        // var collisionLockerDoor = collisionDetector.CollisionCheck(decorationLayer, Game.Player.Position, Game.Player.Direction, "LockerDoor");
+        var collisionStorageDoor = collisionDetector.CollisionCheck(decorationLayer, Game.Player.Position, Game.Player.Direction, "StorageDoor");
 
-        //        if (enableCollisionDetection && (collisionTile != null || collisionLockerDoor != null))
-        if (enableCollisionDetection && collisionTile)
+        if (enableCollisionDetection && (collisionTile != null || collisionStorageDoor != null))
         {
             // Revert Position
-            Game.Player.SetX(playerPos.X);//
+            Game.Player.SetX(playerPos.X);
             Game.Player.SetY(playerPos.Y);
         }
 
-        //if (collisionLockerDoor != null)
-        //{
-        //    Game.LoadScreen(ScreenName.Locker, (sender, e) =>
-        //    {
-        //        Game.Player.SetX(80);
-        //        Game.Player.SetY(90);
-        //    });
-        //}
+        if (collisionStorageDoor != null)
+        {
+            Game.LoadScreen(ScreenName.StorageScreen, (sender, e) =>
+            {
+                Game.Player.SetX(80);
+                Game.Player.SetY(90);
+            });
+        }
     }
 
     public override void Draw(GameTime gameTime)
@@ -84,8 +82,9 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
             tiledMapRenderer.Draw(decorationLayer, Game.Camera.GetViewMatrix());
 
         spriteBatch.Begin(transformMatrix: Game.Camera.GetViewMatrix(), samplerState: SamplerState.PointClamp);
-
-        Game.Player.Draw(gameTime, spriteBatch);
+        {
+            Game.Player.Draw(gameTime, spriteBatch);
+        }
 
         spriteBatch.End();
 

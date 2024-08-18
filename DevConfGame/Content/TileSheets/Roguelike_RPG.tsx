@@ -3,7 +3,7 @@
  <image source="roguelikeSheet_transparent.png" width="968" height="526"/>
  <tile id="151">
   <objectgroup draworder="index" id="2">
-   <object id="1" name="LockerDoor" type="Door" x="0" y="1" width="15" height="15"/>
+   <object id="1" name="StorageDoor" type="Door" x="0" y="1" width="15" height="15"/>
   </objectgroup>
  </tile>
  <tile id="698">
