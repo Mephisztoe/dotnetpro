@@ -1,3 +1,3 @@
 ﻿
-using var game = new DevConfGame.Game1();
+using var game = new DevConfGame.GameMain();
 game.Run();

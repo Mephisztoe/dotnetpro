@@ -91,11 +91,11 @@ public class CollisionDetector(TiledMap tiledMap)
 
                 if (collision)
                 {
-                    Game1.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Red));
+                    GameMain.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Red));
                 }
                 else
                 {
-                    Game1.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Green));
+                    GameMain.DebugRects.Add(new Tuple<RectangleF, Color>(globalRect, Color.Green));
                 }
 
                 return collision;

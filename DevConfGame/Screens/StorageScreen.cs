@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Screens;
 using System;
 
-namespace DevConfGame;
+namespace DevConfGame.Screens;
 
-public class LockerRoom(Game game) : GameScreen(game)
+public class StorageScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
 {
-    private new Game1 Game => (Game1)base.Game;
+    private new GameMain Game => (GameMain)base.Game;
 
     public override void Draw(GameTime gameTime)
     {

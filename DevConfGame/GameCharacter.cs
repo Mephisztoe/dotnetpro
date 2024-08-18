@@ -1,17 +1,13 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
+using System;
 
 namespace DevConfGame;
 
 public abstract class GameCharacter(Game game, Vector2 startPosition, int movementSpeed)
 {
-    protected readonly Game1 Game = (Game1)game;
+    protected readonly GameMain Game = (GameMain)game;
     protected AnimatedSprite sprite;
     protected Vector2 position = startPosition;
     protected readonly int speed = movementSpeed;
@@ -27,7 +23,7 @@ public abstract class GameCharacter(Game game, Vector2 startPosition, int moveme
 
     public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(sprite, position);
+        spriteBatch.Draw(sprite, position);    
     }
 
     public abstract void Update(GameTime gameTime);

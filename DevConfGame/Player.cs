@@ -94,7 +94,7 @@ public class Player(Game game) :
 
         position = Vector2.Round(position * 5) / 5.0f;
 
-        Game1.DebugRects.Add(new Tuple<RectangleF, Color>(
+        GameMain.DebugRects.Add(new Tuple<RectangleF, Color>(
             new RectangleF(position.X + 2, position.Y + 12, 12, 4), Color.Red));
 
         sprite.Update(gameTime);

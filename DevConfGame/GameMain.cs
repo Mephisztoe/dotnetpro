@@ -1,19 +1,16 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DevConfGame.Screens;
+using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
-using MonoGame.Extended.Tiled;
-using MonoGame.Extended.Tiled.Renderers;
+using MonoGame.Extended.Screens;
+using MonoGame.Extended.Screens.Transitions;
 using MonoGame.Extended.ViewportAdapters;
-using System;
-using System.Linq;
 using MonoGame.ImGuiNet;
-using ImGuiNET;
-
-using Vec2 = System.Numerics.Vector2;
-using Vec3 = System.Numerics.Vector3;
-using Vec4 = System.Numerics.Vector4;
+using System;
 using System.Collections.Generic;
+using Vec2 = System.Numerics.Vector2;
 
 namespace DevConfGame;
 
@@ -24,51 +21,57 @@ public enum Direction
     Left,
     Right
 }
+
 public enum ScreenName
 {
-    MainRoom,
-    Locker
+    MainScreen,
+    StorageScreen
 }
 
-public class Game1 : Game
+public class GameMain : Game
 {
-    private GraphicsDeviceManager graphics;
+    GraphicsDeviceManager graphics;
 
-    public SpriteBatch SpriteBatch { get; private set; }
+    SpriteBatch spriteBatch;
 
     public OrthographicCamera Camera { get; private set; }
 
-    Player player;
+    public Player Player { get; set; }
 
     public ImGuiRenderer GuiRenderer { get; private set; }
 
+    public event Action ImGuiRenderRequested;
+
     public CollisionDetector CollisionDetector { get; private set; }
 
-    TiledMap tiledMap;
-    TiledMapRenderer tiledMapRenderer;
-    TiledMapTileLayer floorLayer;
-    TiledMapTileLayer decorationLayer;
-    TiledMapTileLayer foregroundLayer;
+
+    readonly Dictionary<ScreenName, GameScreen> screens = [];
+    readonly ScreenManager screenManager;
+    ScreenName currentScreen;
+
 
     bool enableCollisionDetection = true;
     bool enableDebugRect = true;
-    bool enableForegroundLayer = true;
-    bool enableDecorationLayer = true;
-    bool enableFloorLayer = true;
-    
+
+
     static public List<Tuple<RectangleF, Color>> DebugRects = [];
 
-    public Game1()
+    public GameMain()
     {
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        player = new Player(this);
+        screenManager = new ScreenManager();
+        Components.Add(screenManager);
+
+        Player = new Player(this);
     }
 
     protected override void Initialize()
     {
+        spriteBatch = new SpriteBatch(GraphicsDevice);
+
         var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 320, 180);
         Camera = new OrthographicCamera(viewportAdapter);
 
@@ -77,28 +80,51 @@ public class Game1 : Game
         graphics.PreferredBackBufferHeight = 900;
         graphics.ApplyChanges();
 
+        screens.Add(ScreenName.MainScreen, new MainScreen(this, spriteBatch));
+        screens.Add(ScreenName.StorageScreen, new StorageScreen(this, spriteBatch));
+
         GuiRenderer = new ImGuiRenderer(this);
+        GuiRenderer.RebuildFontAtlas();
+
+        ImGuiRenderRequested += RegisterImGuiHandlers;
 
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        SpriteBatch = new SpriteBatch(GraphicsDevice);
+        LoadScreen(ScreenName.MainScreen);
 
-        tiledMap = Content.Load<TiledMap>("Maps/MainRoom");
-        tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
-        floorLayer = tiledMap.GetLayer<TiledMapTileLayer>("Floor");
-        decorationLayer = tiledMap.GetLayer<TiledMapTileLayer>("Decoration");
-        foregroundLayer = tiledMap.GetLayer<TiledMapTileLayer>("Foreground");
+        Player.LoadContent();
+    }
 
-        CollisionDetector = new CollisionDetector(tiledMap);
+    protected override void UnloadContent()
+    {
+        base.UnloadContent();
 
-        player.LoadContent();
+        // Event-Handler entfernen
+        ImGuiRenderRequested -= RegisterImGuiHandlers;
+    }
 
+    private void RegisterImGuiHandlers()
+    {
+        ImGui.Begin("Visual Debugging");
+        ImGui.Checkbox("Show Debug Rects", ref enableDebugRect);
+        ImGui.Text($"Player Position: {Player.Position.X} {Player.Position.Y}");
+        ImGui.End();
+    }
 
-        GuiRenderer.RebuildFontAtlas();
-    }   
+    public void LoadScreen(ScreenName screen, EventHandler onStateChanged = null)
+    {
+        var transition = new FadeTransition(GraphicsDevice, Color.CornflowerBlue, 0.5f);
+        if (onStateChanged != null)
+        {
+            transition.StateChanged += onStateChanged;
+        }
+
+        screenManager.LoadScreen(screens[screen], transition);
+        currentScreen = screen;
+    }
 
     protected override void Update(GameTime gameTime)
     {
@@ -107,81 +133,47 @@ public class Game1 : Game
 
         DebugRects.Clear();
 
-        // Backup Position
-        var playerPos = player.Position;
-
-        player.Update(gameTime);
-        tiledMapRenderer.Update(gameTime);
-
-        bool collision = CollisionDetector.CollisionCheck(floorLayer, player.Position, player.Direction);
-
-        if (enableCollisionDetection && collision)
-        {
-            // Revert Position
-            player.SetX(playerPos.X);
-            player.SetY(playerPos.Y);
-        }
-       
-        Vector2 delta = player.Position - Camera.Position - new Vector2(152, 82);
+        Vector2 delta = Player.Position - Camera.Position - new Vector2(152, 82);
         Camera.Position += (delta * 0.08f);
+
+        Camera.Position = new Vector2(
+            MathHelper.Clamp(Camera.Position.X, -20, 20),
+            MathHelper.Clamp(Camera.Position.Y, -20, 160));
+
+        Camera.Position = Vector2.Round(Camera.Position * 5) / 5.0f;
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        float frameRate = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+        Window.Title = $"{currentScreen}";
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        Vector2 oldCamPosition = Camera.Position;
-        Camera.Position = Vector2.Round(Camera.Position * 5) / 5.0f;
-
-        Camera.Position = new Vector2(
-            MathHelper.Clamp(Camera.Position.X, -20, 20),
-            MathHelper.Clamp(Camera.Position.Y, -20, 160));
-
-        var transformationMatrix = Camera.GetViewMatrix();
-
-        if (enableFloorLayer)
-            tiledMapRenderer.Draw(floorLayer, viewMatrix: transformationMatrix);
-
-        if (enableDecorationLayer)
-            tiledMapRenderer.Draw(decorationLayer, viewMatrix: transformationMatrix);
-
-        Camera.Position = oldCamPosition;
-
-        SpriteBatch.Begin(transformMatrix: transformationMatrix, samplerState: SamplerState.PointClamp);
-        player.Draw(gameTime, SpriteBatch);
-      
-        DebugRects.Add(new Tuple<RectangleF, Color>(new RectangleF(player.Position.X + 2, player.Position.Y + 12, 12, 4), Color.Red));
-
-        foreach (var debugRect in DebugRects)
-        {
-            DrawDebugRect(SpriteBatch, debugRect.Item1, 1, debugRect.Item2);
-        }
-
-        SpriteBatch.End();
-
+        float frameRate = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
+        
+        // Zeichnet alle Komponenten / Screens
         base.Draw(gameTime);
 
-        if (enableForegroundLayer)
-            tiledMapRenderer.Draw(foregroundLayer, viewMatrix: transformationMatrix);
+        spriteBatch.Begin(transformMatrix: Camera.GetViewMatrix(), samplerState: SamplerState.PointClamp);
+        {
+            if (enableDebugRect)
+                DebugRects.ForEach(debugRect => spriteBatch.DrawRectangle(debugRect.Item1, debugRect.Item2, thickness: .2f));
+        }
+        spriteBatch.End();
 
         GuiRenderer.BeginLayout(gameTime);
-        DrawImGuiOverlay(frameRate);
-        ImGui.Begin("Collision Details");
-        ImGui.Checkbox("Debug Rect", ref enableDebugRect);
-        ImGui.Checkbox("Collision Detection", ref enableCollisionDetection);
-        ImGui.End();
-        ImGui.Begin("Tilemap");
-        ImGui.Checkbox("Show Floor Layer", ref enableFloorLayer);
-        ImGui.Checkbox("Show Decoration Layer", ref enableDecorationLayer);
-        ImGui.Checkbox("Show Foreground Layer", ref enableForegroundLayer);
-        ImGui.End();
+        {
+            // Lokales ImGUI Overlay
+            DrawImGuiOverlay(frameRate);
 
+            // Registrierte ImGUI Overlays
+            ImGuiRenderRequested?.Invoke();
+        }
         GuiRenderer.EndLayout();
     }
+
+    #region "ImGUI Overlay"
 
     //OverlayVariables
     float distanceX = 10.0f;
@@ -250,11 +242,5 @@ public class Game1 : Game
         ImGui.End();
     }
 
-    private void DrawDebugRect(SpriteBatch batch, RectangleF rect, int border, Color color)
-    {
-        if (!enableDebugRect)
-            return;
-
-        batch.DrawRectangle(rect, color, .2f);
-    }    
+    #endregion
 }
