@@ -14,15 +14,39 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Maps/MainScreen.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:Maps/MainScreen.tmx
+
 #begin Maps/StorageScreen.tmx
 /importer:TiledMapImporter
 /processor:TiledMapProcessor
 /build:Maps/StorageScreen.tmx
 
-#begin Maps/MainScreen.tmx
-/importer:TiledMapImporter
-/processor:TiledMapProcessor
-/build:Maps/MainScreen.tmx
+#begin Music/HurryUpBG.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Music/HurryUpBG.ogg
+
+#begin Music/MainScreenBG.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Music/MainScreenBG.ogg
+
+#begin Music/StartScreenBG.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Music/StartScreenBG.ogg
+
+#begin Music/StorageScreenBG.ogg
+/importer:OggImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Music/StorageScreenBG.ogg
 
 #begin Player/SpriteSheet.png
 /importer:TextureImporter

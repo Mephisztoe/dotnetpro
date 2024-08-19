@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Screens;
-using MonoGame.Extended.Tiled.Renderers;
 using MonoGame.Extended.Tiled;
-using System;
-using ImGuiNET;
+using MonoGame.Extended.Tiled.Renderers;
 
 namespace DevConfGame.Screens;
 
@@ -25,8 +25,16 @@ public class StorageScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game
 
     new GameMain Game => (GameMain)base.Game;
 
+    private SoundEffect song = null;
+    private SoundEffectInstance songInstance = null;
+
     public override void LoadContent()
     {
+        song = Content.Load<SoundEffect>("Music/StorageScreenBG");
+        songInstance = song.CreateInstance();
+        songInstance.IsLooped = true;
+        songInstance.Play();
+
         tiledMap = Content.Load<TiledMap>("Maps/StorageScreen");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
 
@@ -42,6 +50,8 @@ public class StorageScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game
     public override void UnloadContent()
     {
         base.UnloadContent();
+
+        songInstance.Stop();
 
         // Event-Handler entfernen
         Game.ImGuiRenderRequested -= RegisterImGuiHandlers;
@@ -91,9 +101,7 @@ public class StorageScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game
 
         if (enableForegroundLayer)
             tiledMapRenderer.Draw(foregroundLayer, Game.Camera.GetViewMatrix());
-    }
-
-    
+    }      
 
     #region "ImGUI Overlay"
 

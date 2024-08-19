@@ -38,6 +38,8 @@ public class GameMain : Game
 
     public Player Player { get; set; }
 
+    public NonPlayer NPC { get; set; }
+
     public ImGuiRenderer GuiRenderer { get; private set; }
 
     public event Action ImGuiRenderRequested;
@@ -66,6 +68,14 @@ public class GameMain : Game
         Components.Add(screenManager);
 
         Player = new Player(this);
+
+        NPC = new NonPlayer(this, waypoints:
+        [
+            new(80, 100),
+            new(200, 100),
+            new(200, 200),
+            new(80, 200)
+        ]);
     }
 
     protected override void Initialize()
@@ -92,10 +102,11 @@ public class GameMain : Game
     }
 
     protected override void LoadContent()
-    {
+    {       
         LoadScreen(ScreenName.MainScreen);
 
         Player.LoadContent();
+        NPC.LoadContent();
     }
 
     protected override void UnloadContent()
@@ -141,7 +152,7 @@ public class GameMain : Game
             MathHelper.Clamp(Camera.Position.Y, -20, 160));
 
         Camera.Position = Vector2.Round(Camera.Position * 5) / 5.0f;
-
+              
         base.Update(gameTime);
     }
 

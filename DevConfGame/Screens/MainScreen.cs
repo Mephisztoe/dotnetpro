@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Screens;
 using MonoGame.Extended.Tiled;
@@ -24,8 +25,16 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
 
     new GameMain Game => (GameMain)base.Game;
 
+    private SoundEffect song = null;
+    private SoundEffectInstance songInstance = null;
+
     public override void LoadContent()
-    {
+    {       
+        song = Content.Load<SoundEffect>("Music/MainScreenBG");
+        songInstance = song.CreateInstance();
+        songInstance.IsLooped = true;
+        songInstance.Play();
+
         tiledMap = Content.Load<TiledMap>("Maps/MainScreen");
         tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, tiledMap);
 
@@ -41,6 +50,8 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
     {
         base.UnloadContent();
 
+        songInstance.Stop();
+
         // Event-Handler entfernen
         Game.ImGuiRenderRequested -= RegisterImGuiHandlers;
     }
@@ -51,6 +62,8 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
         var playerPos = Game.Player.Position;
 
         Game.Player.Update(gameTime);
+        Game.NPC.Update(gameTime);
+
         tiledMapRenderer.Update(gameTime);
 
         var collisionTile = collisionDetector.CollisionCheck(floorLayer, Game.Player.Position, Game.Player.Direction);
@@ -84,8 +97,8 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
         spriteBatch.Begin(transformMatrix: Game.Camera.GetViewMatrix(), samplerState: SamplerState.PointClamp);
         {
             Game.Player.Draw(gameTime, spriteBatch);
+            Game.NPC.Draw(gameTime, spriteBatch);
         }
-
         spriteBatch.End();
 
         if (enableForegroundLayer)
