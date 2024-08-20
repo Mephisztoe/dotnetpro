@@ -67,21 +67,23 @@ public class MainScreen(Game game, SpriteBatch spriteBatch) : GameScreen(game)
         tiledMapRenderer.Update(gameTime);
 
         var collisionTile = collisionDetector.CollisionCheck(floorLayer, Game.Player.Position, Game.Player.Direction);
-        var collisionStorageDoor = collisionDetector.CollisionCheck(decorationLayer, Game.Player.Position, Game.Player.Direction, "StorageDoor");
+        collisionTile ??= collisionDetector.CollisionCheck(decorationLayer, Game.Player.Position, Game.Player.Direction);
 
-        if (enableCollisionDetection && (collisionTile != null || collisionStorageDoor != null))
+        var collisionDoor = collisionDetector.CollisionCheck(decorationLayer, Game.Player.Position, Game.Player.Direction, "Door");
+
+        if (enableCollisionDetection && (collisionTile != null || collisionDoor != null))
         {
             // Revert Position
             Game.Player.SetX(playerPos.X);
             Game.Player.SetY(playerPos.Y);
         }
 
-        if (collisionStorageDoor != null)
+        if (collisionDoor != null)
         {
             Game.LoadScreen(ScreenName.StorageScreen, (sender, e) =>
             {
-                Game.Player.SetX(80);
-                Game.Player.SetY(90);
+                Game.Player.SetX(114);
+                Game.Player.SetY(50);
             });
         }
     }
